@@ -12,7 +12,7 @@ import { Input } from '../ui/input'
 import { Card, CardContent, CardFooter, CardHeader } from '../ui/card'
 import { Button } from '../ui/button'
 import useWindowSize from '@/hooks/useWindowSize'
-import { Menu, Trash2, X } from 'lucide-react'
+import { Menu, Trash2, X, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import UrlForm, { ResponseDataType, formSchema } from './UrlForm'
 import ClipbordCopy from './ClipbordCopy'
@@ -242,48 +242,64 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
         </CardHeader>
         <CardContent>
           <div>
-            {urlList.map(url => (
-              <Button
-                asChild
-                key={url.full_short}
-                variant={'ghost'}
-                className={cn('flex w-full justify-between gap-2', {
-                  'bg-accent': url.short_url === selectedUrl?.short_url,
-                })}
-                onClick={() => selectUrl(url)}
-              >
-                <div className='cursor-pointer select-none'>
-                  <p className='w-full overflow-hidden text-ellipsis text-start'>
-                    {prettierUrl(url.original_url)}
-                  </p>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant={'destructive'} className='h-fit p-1.5'>
-                        <Trash2 size={14} />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete your account and remove your data from our
-                          database.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(url)}>
-                          <Trash2 size={20} />
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </Button>
-            ))}
+              {/* Copy url left side Dashboard and Short names of the URLS
+              LUIS HAVE DONE CHANGES UNTILL LINE 301 */}
+          {urlList.map(url => (
+  <div key={url.full_short} className="flex items-center gap-2 w-full">
+    <div
+      className={cn('flex-1 cursor-pointer select-none p-2 rounded hover:bg-gray-100', {
+        'bg-accent': url.short_url === selectedUrl?.short_url,
+      })}
+      onClick={() => selectUrl(url)}
+    >
+      <p className='w-full overflow-hidden text-ellipsis text-start'>
+      {url.short_url}
+      </p>
+    </div>
+    
+    {/* Botones agrupados con menos espacio entre ellos */}
+    <div className="flex items-center gap-1">
+      <Button
+        variant="outline"
+        size="sm"
+        className="px-2 flex-shrink-0"
+        onClick={(e) => {
+          e.stopPropagation()
+          navigator.clipboard.writeText(url.full_short)
+          toast.success("URL copied!")
+        }}
+      >
+        <Copy size={16} />
+      </Button>
+      
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant={'destructive'} className='h-fit p-1.5'>
+            <Trash2 size={14} />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you absolutely sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently
+              delete this data and remove it from our
+              database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete(url)}>
+              <Trash2 size={20} />
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  </div>
+))}
           </div>
         </CardContent>
       </Card>
@@ -351,3 +367,4 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
 }
 
 export default UrlList
+
