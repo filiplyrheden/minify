@@ -20,8 +20,7 @@ import { cn } from '@/lib/utils'
 import { CalendarIcon, Info, X } from 'lucide-react'
 import { Calendar } from '../ui/calendar'
 import { format } from 'date-fns'
-import { HoverCard } from '@radix-ui/react-hover-card'
-import { HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
 import { DBUrlRow } from '@/types/types'
 import { toast } from 'sonner'
 import QRCodeDialog from './QrCode'
@@ -149,6 +148,12 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
     setSelectedDate(undefined)
   }
 
+  const [openInfo, setOpenInfo] = useState({
+    short: false,
+    expires: false,
+    max: false,
+  })
+
   return (
     <Form {...form}>
       <form
@@ -183,9 +188,22 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             <FormItem className='col-span-2'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Custom short url (optional)
-                <HoverCard>
-                  <HoverCardTrigger className='cursor-pointer'>
-                    <Info size={16} />
+                <HoverCard
+                  open={openInfo.short}
+                  onOpenChange={o => setOpenInfo(s => ({ ...s, short: o }))}
+                >
+                  <HoverCardTrigger asChild>
+                    <button
+                      type='button'
+                      className='cursor-pointer'
+                      onClick={e => {
+                        e.preventDefault()
+                        setOpenInfo(s => ({ ...s, short: !s.short }))
+                      }}
+                      aria-label='Mer info om custom short url'
+                    >
+                      <Info size={16} />
+                    </button>
                   </HoverCardTrigger>
                   <HoverCardContent>
                     This field can be left empty and we will generate a path for
@@ -212,9 +230,22 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             <FormItem className='col-span-2 flex flex-col sm:col-span-1'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Expires (optional)
-                <HoverCard>
-                  <HoverCardTrigger className='cursor-pointer'>
-                    <Info size={16} />
+                <HoverCard
+                  open={openInfo.expires}
+                  onOpenChange={o => setOpenInfo(s => ({ ...s, expires: o }))}
+                >
+                  <HoverCardTrigger asChild>
+                    <button
+                      type='button'
+                      className='cursor-pointer'
+                      onClick={e => {
+                        e.preventDefault()
+                        setOpenInfo(s => ({ ...s, expires: !s.expires }))
+                      }}
+                      aria-label='Mer info om expiration'
+                    >
+                      <Info size={16} />
+                    </button>
                   </HoverCardTrigger>
                   <HoverCardContent>
                     Expiration date for when the url will no longer work
@@ -279,9 +310,22 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
             <FormItem className='col-span-2 sm:col-span-1'>
               <FormLabel className='flex w-full flex-grow items-center justify-between'>
                 Max views (optional)
-                <HoverCard>
-                  <HoverCardTrigger className='cursor-pointer'>
-                    <Info size={16} />
+                <HoverCard
+                  open={openInfo.max}
+                  onOpenChange={o => setOpenInfo(s => ({ ...s, max: o }))}
+                >
+                  <HoverCardTrigger asChild>
+                    <button
+                      type='button'
+                      className='cursor-pointer'
+                      onClick={e => {
+                        e.preventDefault()
+                        setOpenInfo(s => ({ ...s, max: !s.max }))
+                      }}
+                      aria-label='Mer info om max views'
+                    >
+                      <Info size={16} />
+                    </button>
                   </HoverCardTrigger>
                   <HoverCardContent>
                     Set the maximum views allowed for this URL before it is
