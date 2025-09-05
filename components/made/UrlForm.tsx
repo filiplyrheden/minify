@@ -304,16 +304,23 @@ const UrlForm: FC<UrlFormProps> = ({ initialValue, onSubmit }) => {
         />
 
         <div
-          className={cn('col-span-2 grid gap-4', {
-            'grid-cols-2': initialValue,
-          })}
+          className={cn(
+            'col-span-2',
+            initialValue
+              ? 'grid grid-cols-[auto_auto] items-center justify-center gap-3'
+              : 'flex justify-center',
+          )}
         >
-          <Button type='submit' disabled={!form.formState.isValid}>
+          <Button
+            type='submit'
+            size='sm'
+            className='mt-4 px-8'
+            disabled={!form.formState.isValid}
+          >
             {!initialValue ? 'Create' : 'Save'}
           </Button>
-          <div>
-            {initialValue ? <QRCodeDialog url={initialValue.url} /> : null}
-          </div>
+
+          {initialValue ? <QRCodeDialog url={initialValue.url} /> : null}
         </div>
       </form>
     </Form>
