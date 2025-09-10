@@ -13,6 +13,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '../ui/card'
 import { Button } from '../ui/button'
 import useWindowSize from '@/hooks/useWindowSize'
 import { Menu, Trash2, X, Copy } from 'lucide-react'
+import { formatDistanceToNow, isBefore } from 'date-fns'
 import { cn } from '@/lib/utils'
 import UrlForm, { ResponseDataType, formSchema } from './UrlForm'
 import ClipbordCopy from './ClipbordCopy'
@@ -20,10 +21,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
-import {
-  deleteUrlSchema,
-  updateUrlSchema,
-} from '@/app/api/user/url/[slug]/schema'
+import {deleteUrlSchema,updateUrlSchema} from '@/app/api/user/url/[slug]/schema'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,8 +31,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from '../ui/alert-dialog'
+  AlertDialogTrigger} from '../ui/alert-dialog'
 import { ApiResponse, DBUrlRow } from '@/types/types'
 
 type UrlListProps = {
@@ -59,6 +56,31 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
   const [initUrls, setInitUrls] = useState<UrlType[]>(urls)
   const [urlList, setUrlList] = useState<UrlType[]>(urls)
   const [selectedUrl, setSelectedUrl] = useState<UrlType | null>(null)
+  const getUrlStatus = (url: UrlType) => {
+    const now = new Date()
+    
+    if (url.expires_at && isBefore(new Date(url.expires_at), now)) {
+      return { status: 'expired', color: 'bg-red-100 text-red-800', text: 'Expired' }
+    }
+    
+    if (url.max_views && url.views >= url.max_views) {
+      return { status: 'limit-reached', color: 'bg-orange-100 text-orange-800', text: 'Limit Reached' }
+    }
+    
+    if (url.expires_at) {
+      const expiresAt = new Date(url.expires_at)
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      if (isBefore(expiresAt, sevenDaysFromNow)) {
+        return { status: 'expiring-soon', color: 'bg-yellow-100 text-yellow-800', text: 'Expiring Soon' }
+      }
+    }
+    
+    return { status: 'active', color: 'bg-green-100 text-green-800', text: 'Active' }
+  }
+  
+  const formatCreatedDate = (dateString: string) => {
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true })
+  }
 
   const size = useWindowSize()
   const session = useSession()
@@ -242,20 +264,29 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
         </CardHeader>
         <CardContent>
           <div>
-              {/* Copy url left side Dashboard and Short names of the URLS
+              {/* Copy url left side Dashboard and Short names of the URLS with status badge (Active, Expired, etc.)
+Formatted date ('3 days ago') with click counter and colour Badges at the side of every URL", Alert dialog changed
               LUIS HAVE DONE CHANGES UNTILL LINE 301 */}
           {urlList.map(url => (
   <div key={url.full_short} className="flex items-center gap-2 w-full">
-    <div
-      className={cn('flex-1 cursor-pointer select-none p-2 rounded hover:bg-gray-100', {
-        'bg-accent': url.short_url === selectedUrl?.short_url,
-      })}
-      onClick={() => selectUrl(url)}
-    >
-      <p className='w-full overflow-hidden text-ellipsis text-start'>
+  <div
+  className={cn('flex-1 cursor-pointer select-none p-2 rounded hover:bg-gray-100', {
+    'bg-accent': url.short_url === selectedUrl?.short_url,
+  })}
+  onClick={() => selectUrl(url)}
+>
+  <div className="flex items-center justify-between">
+    <p className='overflow-hidden text-ellipsis font-medium'>
       {url.short_url}
-      </p>
-    </div>
+    </p>
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getUrlStatus(url).color}`}>
+      {getUrlStatus(url).text}
+    </span>
+  </div>
+  <p className="text-sm text-gray-500 mt-1">
+    {formatCreatedDate(url.created_at)} • {url.views} clicks
+  </p>
+</div>
     
     {/* Botones agrupados con menos espacio entre ellos */}
     <div className="flex items-center gap-1">
@@ -284,9 +315,8 @@ const UrlList: FC<UrlListProps> = ({ urls }) => {
               Are you absolutely sure?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently
-              delete this data and remove it from our
-              database.
+            This action cannot be undone. This will permanently
+            delete this URL and remove it from your account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
