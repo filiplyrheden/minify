@@ -82,12 +82,12 @@ const LoginForm: FC<FormProps> = ({}) => {
         error: (error: Error) => error.message || "Failed signin, please try again"
     })
   }
+  // Luis: Tailwind improvements: button hover scaling, label color changes, form gap spacing, and fade-in animations
 
   return (
-
     <Form {...form}>
       <form
-        className='flex flex-col gap-2'
+        className='flex flex-col gap-4 animate-in fade-in-50 duration-500'
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField
@@ -95,7 +95,9 @@ const LoginForm: FC<FormProps> = ({}) => {
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="hover:text-blue-600 transition-colors cursor-pointer">
+                Email
+              </FormLabel>
               <FormControl>
                 <Input tabIndex={2} autoFocus autoComplete='email' {...field} />
               </FormControl>
@@ -108,7 +110,9 @@ const LoginForm: FC<FormProps> = ({}) => {
           name='password'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="hover:text-blue-600 transition-colors cursor-pointer">
+                Password
+              </FormLabel>
               <FormControl>
                 <Input
                   tabIndex={3}
@@ -124,14 +128,13 @@ const LoginForm: FC<FormProps> = ({}) => {
         <Button
           disabled={!form.formState.isValid}
           tabIndex={4}
-          className='mt-4 w-full'
+          className='mt-4 w-full hover:scale-105 transition-transform duration-200 hover:shadow-lg'
           type='submit'
         >
           Login
         </Button>
       </form>
     </Form>
-
   )
 }
 
